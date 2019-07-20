@@ -6,7 +6,7 @@ import numpy as np
 
 def main(args):
     kinesisStream = KinesisVideoStream(args.stream_name)
-    capture = cv2.VideoCapture(kinesisStream.get_streaming_session_url())
+    capture = cv2.VideoCapture(kinesisStream.get_live_streaming_session_url())
 
     CODEC = "H264"
     FPS = args.fps
