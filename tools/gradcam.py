@@ -4,6 +4,7 @@ from deepracer_viz.gradcam import load_model_session, gradcam, blend_gradcam_ima
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
+import time
 
 
 # Function for processing image and applying GradCAM
@@ -53,6 +54,8 @@ def main(args):
 
             if video_stream.status_code == 200:
                 print("Video Connected!")
+                last_image_time = time.time()
+                # Bytes to build Jpeg
                 bytes = bytes()
                 for chunk in video_stream.iter_content(chunk_size=1024):
                     bytes += chunk
@@ -62,10 +65,12 @@ def main(args):
                     if a != -1 and b != -1:
                         jpg = bytes[a:b + 2]
                         bytes = bytes[b + 2:]
-                        i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
-                        out_frame = process_image(i, sess)
-                        # cv2.imshow('Raw Image', i)
-                        cv2.imshow('GradCAM', cv2.resize(out_frame, (1920, 1440)))
+                        if time.time() - last_image_time > 1.0 / args.fps:
+                            i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
+                            out_frame = process_image(i, sess)
+                            # cv2.imshow('Raw Image', i)
+                            cv2.imshow('GradCAM', cv2.resize(out_frame, (1920, 1440)))
+                            last_image_time = time.time()
                         if cv2.waitKey(1) == 27:  # Press esc to stop processing images
                             break
             else:
@@ -117,7 +122,7 @@ if __name__ == '__main__':
 
     # args for static input and output video (optional)
     parser.add_argument("-f", "--input_file", help="The name of the MP4 file to process.")
-    parser.add_argument("--fps", help="FPS of the output video.", type=int, default=15)
+    parser.add_argument("--fps", help="FPS of the output video.", type=int, default=10)
     parser.add_argument("-o", "--output", help="MP4 output file to store the gradcam output.")
 
     # args for live stream from physical DeepRacer (optional)
