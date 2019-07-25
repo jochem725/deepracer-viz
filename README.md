@@ -8,7 +8,7 @@ Repository containing tools to visualize AWS DeepRacer (training) runs. Currentl
 
 ## Installation
 First prepare the Python enviroment using `poetry install`.
-Available tools can be found in the `tools` folder. Before running a tool make sure the virtual environment is activated using `poetry shell`.
+Available tools can be found in the `tools` folder. Before running a tool make sure the virtual environment is activated using `poetry shell`. You may need to use a venv or conda env to get the right python version (3.7) for poetry.
 
 ## Downloading your model
 You can obtain your model graph in the form of a `.pb` file either from S3 or from the DeepRacer console.
@@ -16,6 +16,7 @@ You can obtain your model graph in the form of a `.pb` file either from S3 or fr
 - Console -> Select your training run and choose `Download model`. Inside the obtained `.tar.gz` you can find your `model.pb` file. 
 
 # Visualization tools
+Example: run `python tools/gradcam.py  ~/Desktop/model.pb 1  -i 192.168.1.*** -p ********` for live gradCAM of DeepRacer feed. Make sure you are on the same wifi network as your DeepRacer and that you have the correct IP and password. Press `esc` to stop running the program.
 
 ## Kinesis Downloader
 Can be used to view and store the live feed of a training job. This is the same feed that is shown in the AWS DeepRacer console.

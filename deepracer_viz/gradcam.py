@@ -1,16 +1,13 @@
-import tensorflow as tf
-from tensorflow.python.platform import gfile
-import numpy as np
 import cv2
-import os
+import numpy as np
+import tensorflow as tf
 
 
 def load_model_session(pbpath: str):
-    sess = tf.Session(config=tf.ConfigProto(
-        allow_soft_placement=True, log_device_placement=True))
+    sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True, log_device_placement=False))
 
-    with gfile.FastGFile(pbpath, 'rb') as f:
-        graph_def = tf.GraphDef()
+    with tf.io.gfile.GFile(pbpath, 'rb') as f:
+        graph_def = tf.compat.v1.GraphDef()
         graph_def.ParseFromString(f.read())
 
     sess.graph.as_default()
@@ -19,7 +16,7 @@ def load_model_session(pbpath: str):
     return sess
 
 
-def gradcam(sess: tf.Session, input_frame, action_idx):
+def gradcam(sess: tf.compat.v1.Session, input_frame, action_idx):
 
     input_img = cv2.resize(input_frame, (160, 120))
     input_img = np.expand_dims(input_img, axis=2)
