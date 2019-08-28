@@ -5,6 +5,7 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import time
+import os
 
 
 # Function for processing image and applying GradCAM
@@ -27,7 +28,19 @@ def main(args):
     FPS = args.fps
 
     # if the ip argument exists then enter into live view mode with video from physical DeepRacer
+    if args.output:
+        fourcc = cv2.VideoWriter_fourcc(*CODEC)
+        raw_path = os.path.join(args.output, "raw")
+        print("Saving images to " + raw_path)
+        gradcam_path = os.path.join(args.output, "gradcam")
+        print("Saving gradcam images to " + gradcam_path)
+        if not os.path.exists(raw_path):
+            os.mkdir(raw_path)
+        if not os.path.exists(gradcam_path):
+            os.mkdir(gradcam_path)
+
     if args.ip:
+        # Setup file to save the output to
         with requests.Session() as s:
             URL = "https://" + str(args.ip) + "/"
             post_login_url = URL + "/login"
@@ -65,12 +78,17 @@ def main(args):
                     if a != -1 and b != -1:
                         jpg = bytes[a:b + 2]
                         bytes = bytes[b + 2:]
+
                         if time.time() - last_image_time > 1.0 / args.fps:
                             i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                             out_frame = process_image(i, sess)
                             # cv2.imshow('Raw Image', i)
                             cv2.imshow('GradCAM', cv2.resize(out_frame, (1920, 1440)))
                             last_image_time = time.time()
+                            # Save the images to file if args.output is specified
+                            if args.output:
+                                cv2.imwrite(os.path.join(raw_path, str(last_image_time) + '.jpg'), i)
+                                cv2.imwrite(os.path.join(gradcam_path, str(last_image_time) + '.jpg'), out_frame)
                         if cv2.waitKey(1) == 27:  # Press esc to stop processing images
                             break
             else:
@@ -78,27 +96,20 @@ def main(args):
 
     else:
         capture = cv2.VideoCapture(args.input_file)
-        fourcc = cv2.VideoWriter_fourcc(*CODEC)
-
-        # If an output file is specified then init writer
-        if args.output:
-            writer = None
-        else:
-            writer = 1  # This will prevent writer init
 
         sess = load_model_session(args.model)
         while capture.isOpened():
             ret, frame = capture.read()
             if ret:
-                if writer is None:
-                    writer = cv2.VideoWriter(
-                        args.output, fourcc, FPS, (frame.shape[1], frame.shape[0]))
 
                 # Apply GradCAM
                 out_frame = process_image(frame, sess)
 
                 cv2.imshow('frame', out_frame)
-                writer.write(out_frame)
+                if args.output:
+                    last_image_time = time.time()
+                    cv2.imwrite(os.path.join(raw_path, str(last_image_time) + '.jpg'), frame)
+                    cv2.imwrite(os.path.join(gradcam_path, str(last_image_time) + '.jpg'), out_frame)
 
                 if cv2.waitKey(int(np.ceil(1000.0 / FPS))) & 0xFF == ord('q'):
                     break
@@ -106,9 +117,6 @@ def main(args):
                 break
 
         capture.release()
-        # release writer if it was used
-        if writer is None:
-            writer.release()
 
     cv2.destroyAllWindows()
 
