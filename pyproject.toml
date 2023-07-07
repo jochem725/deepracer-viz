@@ -5,17 +5,27 @@ description = ""
 authors = ["jochem725 <jochemlugtenburg@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-tensorflow = "^1.14"
-autopep8 = "^1.4"
-pylint = "^2.3"
-numpy = "^1.16"
-opencv-python = "^4.1"
-boto3 = "^1.9"
+python = ">=3.8,<3.11"
+tensorflow-macos = "^2.10.0"
+tensorflow-metal = "^0.6.0"
+numpy = "^1.23.5"
+boto3 = "^1.26.13"
+pillow = "^9.3.0"
+matplotlib = "^3.6.2"
+opencv-python = "^4.6.0.66"
+click = "^8.1.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+autopep8 = "^2.0.0"
+pylint = "^2.15.6"
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+drviz = "deepracer_viz.main:cli"
+
+[tool.black]
+line-length=120
