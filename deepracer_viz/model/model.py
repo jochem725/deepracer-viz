@@ -43,7 +43,7 @@ class Model:
         return self.metadata.action_space.select_action(model_output)
 
     @classmethod
-    def from_file(cls, model_pb_path: str, metadata: ModelMetadata):
+    def from_file(cls, model_pb_path: str, metadata: ModelMetadata, log_device_placement: bool = False):
         """Load the TensorFlow graph for a model.pb model file.
         Args:
             pbpath (str): Path to the model.pb file
@@ -56,7 +56,7 @@ class Model:
             tf1.reset_default_graph()
             sess = tf1.Session(
                 config=tf1.compat.v1.ConfigProto(
-                    allow_soft_placement=True, log_device_placement=True
+                    allow_soft_placement=True, log_device_placement=log_device_placement
                 )
             )
 
