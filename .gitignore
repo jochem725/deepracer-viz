@@ -125,3 +125,6 @@ dmypy.json
 
 .vscode
 .DS_Store
+
+# Test files
+test_data
